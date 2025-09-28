@@ -2,49 +2,48 @@ pipeline {
     agent any
 
     environment {
-        PYTHON = "/usr/bin/python"  // Change if needed
+        VIRTUAL_ENV = "${WORKSPACE}/venv"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                git branch: 'main', url: 'https://github.com/vigneshrajahart/B12-CI-CD-Pipeline.git'
+                echo 'Creating virtual environment and installing dependencies...'
+                sh 'python3 -m venv venv'
+                sh '${VIRTUAL_ENV}/bin/pip install --upgrade pip'
+                sh '${VIRTUAL_ENV}/bin/pip install -r requirements.txt'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Test') {
             steps {
-                sh "${PYTHON} -m pip install --upgrade pip"
-                sh "${PYTHON} -m pip install -r requirements.txt"
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh "${PYTHON} -m pytest"
+                echo 'Running unit tests...'
+                sh '${VIRTUAL_ENV}/bin/pytest tests/'
             }
         }
 
         stage('Deploy') {
+            when {
+                branch 'main'
+            }
             steps {
-                sh """
-                pkill -f 'flask run' || true
-                export FLASK_APP=app.py
-                nohup ${PYTHON} -m flask run --host=0.0.0.0 --port=5000 &
-                """
+                echo 'Deploying to staging environment...'
+                # Add your deployment commands here
+                sh 'echo "Deploying application..."'
             }
         }
     }
 
     post {
-        always {
-            echo "Pipeline finished"
-        }
         success {
-            echo "Deployment Successful!"
+            mail to:'vignesh.vv11@gmail.com',
+                 subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Good news! The build succeeded."
         }
         failure {
-            echo "Pipeline Failed!"
+            mail to: 'vignesh.vv11@gmail.com',
+                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Oops! The build failed. Check Jenkins for details."
         }
     }
 }
