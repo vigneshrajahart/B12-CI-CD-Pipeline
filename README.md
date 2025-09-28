@@ -161,3 +161,88 @@ Jenkins will automatically trigger the pipeline.
 Monitor pipeline progress in the Jenkins dashboard.
 
 Check email notifications for build results.
+
+
+______________________________________________________________________________________
+
+TAST 2 :  GitHub Actions CI/CD Pipeline Flask App
+# Flask Application with CI/CD using GitHub Actions
+
+## Overview
+
+This repository implements a **CI/CD pipeline** using GitHub Actions for a Python Flask application. The workflow automates testing and deployment to **staging** and **production** environments.
+
+---
+
+## Branch Structure
+
+- `main` → Production branch  
+- `staging` → Staging branch for testing changes before production
+
+---
+
+## Workflow Steps
+
+1. **Install Dependencies**  
+   Installs Python dependencies from `requirements.txt`.
+
+2. **Run Tests**  
+   Executes unit tests using `pytest` to ensure code quality.
+
+3. **Build**  
+   Prepares the application for deployment (if needed).
+
+4. **Deploy to Staging**  
+   Triggered when code is pushed to the `staging` branch.  
+   Uses secret `STAGING_API_KEY` for deployment.
+
+5. **Deploy to Production**  
+   Triggered when a release tag is created on the `main` branch.  
+   Uses secret `PROD_API_KEY` for deployment.
+
+---
+
+## GitHub Actions Workflow
+
+The workflow file is located at:  
+`.github/workflows/ci-cd.yml`
+
+**Jobs Defined:**
+
+- `install_dependencies` → Set up Python and install packages
+- `run_tests` → Run unit tests using `pytest`
+- `deploy_staging` → Deploy to staging environment on `staging` branch
+- `deploy_production` → Deploy to production environment on release tags
+
+---
+
+## Environment Secrets
+
+Set the following **GitHub repository secrets**:
+
+- `STAGING_API_KEY` → API key for staging deployment  
+- `PROD_API_KEY` → API key for production deployment  
+
+> Secrets are accessible in the workflow via `${{ secrets.SECRET_NAME }}`
+
+---
+
+## How to Use
+
+1. Push code changes to the **staging** branch → Automatic staging deployment.  
+2. Create a release tag on **main** → Automatic production deployment.  
+3. Check **Actions** tab in GitHub to monitor workflow runs.
+
+---
+
+## Testing
+
+- Ensure `tests/` directory contains unit tests.  
+- Example test: `tests/test_app.py`:
+
+```python
+from app import app
+
+def test_home():
+    response = app.test_client().get('/')
+    assert response.status_code == 200
