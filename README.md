@@ -151,7 +151,7 @@ Test Stage Output
 
 Deployment Stage Output
 
-(Screenshots can be added here after running the pipeline.)
+(Screenshots can be added here after running the pipeline.) 
 
 Usage
 Push changes to the main branch.
